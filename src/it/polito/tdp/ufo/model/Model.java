@@ -15,6 +15,33 @@ import it.polito.tdp.ufo.db.SightingsDAO;
 
 public class Model {
 	
+	// PER LA RICORSIONE
+	
+	// 1. Struttura dati "finale"
+	private List<String> ottima; // dove sara' presente il percorso massimo
+	
+	// ottima e' una lista di stati (String) in cui c'e' lo stato di partenza
+	// e un insieme di altri stati (non ripetuti)
+	
+	// 2. Struttura dati parziale -> lista definita nel metodo ricorsivo
+	
+	// 3. Condizione di terminazione
+	// dopo un determinato nodo, non ci sono piu' successori che non ho (gia') considerato
+	
+	// 4. Generare una nuova soluzione a partire da una soluzione parziale
+	// dato l'ultimo nodo inserito in parziale, considero tutti i successori di quel nodo
+	// che non ho ancora considerato
+	
+	// 5. filtro
+	// alla fine, ritornero' una sola soluzione -> quella per cui la size() e' massima
+	
+	// 6. Livello di ricorsione
+	// lunghezza del percorso parziale
+	
+	// 7. caso iniziale
+	// parziale contiene il mio stato di partenza
+	
+	
 	private SightingsDAO dao;
 	private List<String> stati; // e' come se fosse l'idMap
 								// xke' in questo caso  i vertici sono delle stringhe semplici
@@ -76,13 +103,52 @@ public class Model {
 		List<String> raggiungibili = new LinkedList<>();
 		DepthFirstIterator<String,DefaultEdge> dp = new DepthFirstIterator<String,DefaultEdge>(this.grafo,stato);
 		
-		dp.next();
+		dp.next(); // scarta il primo elemento perche' vuole la lista dei raggiungibili
 		
 		while (dp.hasNext()) {
 			raggiungibili.add(dp.next());
 		}
 		
 		return raggiungibili;
+	}
+	
+	public List<String> getPercorsoMassimo(String partenza) {
+		
+		// Tutte le volte che chiamo dall'esterno questo metodo
+		// creo this.ottima
+		this.ottima = new LinkedList<String>();
+		
+		// La soluzione parziale, lista di stringhe, la creo direttamente qua dentro
+		List<String> parziale = new LinkedList<String>();
+				
+		parziale.add(partenza); // 7.
+		
+		cercaPercorso(parziale);
+				
+		
+		return this.ottima;
+	}
+
+	private void cercaPercorso(List<String> parziale) {
+		
+		// vedere se la soluzione corrente e' migliore dell'ottima corrente
+		if(parziale.size()>ottima.size()) {
+			this.ottima = new LinkedList<String>(parziale); // clono la lista
+		}
+		
+		// prendo tutti i successori dell'ultimo nodo inserito nella parziale
+		// ottengo tutti i candidati
+		List<String> candidati = this.getSuccessori(parziale.get(parziale.size()-1));
+		
+		for(String candidato : candidati) {
+			if(!parziale.contains(candidato)) { // condizione di terminazione implicita
+				// e' un candidato che non ho ancora considerato
+				parziale.add(candidato);
+				this.cercaPercorso(parziale);
+				parziale.remove(parziale.size()-1);
+				// parziale.remove(candidato);
+			}
+		}		
 	}
 	
 }

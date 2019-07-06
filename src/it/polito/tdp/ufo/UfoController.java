@@ -79,6 +79,19 @@ public class UfoController {
     @FXML
     void handleSequenza(ActionEvent event) {
 
+    	String stato = boxStato.getValue();
+    	if(stato == null) {
+    		txtResult.appendText("Devi selezionare uno stato!");
+    		return;
+    	}
+    	
+    	List<String> percorso = this.model.getPercorsoMassimo(stato);
+    	txtResult.clear();
+    	txtResult.appendText("PERCORSO MASSIMO : \n\n");
+    	for(String s : percorso) {
+    		txtResult.appendText(s + " - ");
+    	}
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
